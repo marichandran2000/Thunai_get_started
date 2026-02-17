@@ -1,19 +1,5 @@
 import axios from "axios";
 import type { Method } from "axios";
-import * as CryptoJS from "crypto-js";
-
-const IS_ENCRYPTION_FLOW =
-  (window as any)['env']['IS_ENCRYPTION_FLOW'] === "true" ||
-  (window as any)['env']['IS_ENCRYPTION_FLOW'] === true;
-
-// const HTTP_ENCRYPT_KEY = (window as any)['env']['ENCRYPTION_KEY'];
-const HTTP_ENCRYPT_KEY = (window as any)?.env?.ENCRYPTION_KEY;
-
-const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || (window as any)['env']['API_ENDPOINT']; 
-
-if (IS_ENCRYPTION_FLOW && !HTTP_ENCRYPT_KEY) {
-  console.error("Encryption key is missing!");
-}
 
 const url = new URL(window.location.href);
 const urlToken = url.searchParams.get("token");
@@ -23,8 +9,6 @@ const urlIdentifier = url.searchParams.get("url_identifier");
 const userId = url.searchParams.get("user_id");
 const urlRefreshToken = url.searchParams.get("refresh_token");
 const urlValidUntil = url.searchParams.get("valid_until");
-const Email = url.searchParams.get("Email");
-const org_name = url.searchParams.get("org_name");
 
 
 
@@ -32,8 +16,7 @@ const org_name = url.searchParams.get("org_name");
 if (urlToken) localStorage.setItem("agent_token", urlToken);
 if (urlTenantId) localStorage.setItem("tenant_id", urlTenantId);
 if (urlCsrfToken) localStorage.setItem("csrf_token", urlCsrfToken);
-if (Email) localStorage.setItem("Email", Email);
-if (org_name) localStorage.setItem("org_name", org_name);
+
 
 
 if(urlIdentifier) localStorage.setItem("url_identifier",urlIdentifier);
@@ -44,17 +27,17 @@ if(urlValidUntil) localStorage.setItem("valid_until",urlValidUntil)
 
 // All service base URLs
 const SERVICE_BASE_URLS: Record<string, string> = {
-  authService: `${API_ENDPOINT}/auth-service/ai/api/v1`,
-  accountService: `${API_ENDPOINT}/account-service/ai/api/v1`,
-  chatService: `${API_ENDPOINT}/chat-service/chatai/api/v1`,
-  slackService: `${API_ENDPOINT}/slack-service/slackai/v1`,
-  intService: `${API_ENDPOINT}/int-service/thunai/v1`,
-  intServiceV2: `${API_ENDPOINT}/int-service/thunai/v2`,
-  workflowService: `${API_ENDPOINT}/workflow-service/agent-workflow/v1`,
-  mcpService: `${API_ENDPOINT}/workflow-service/mcp/v1`,
-  documentService: `${API_ENDPOINT}/document-service/ai/api/v1`,
-  brainService: `${API_ENDPOINT}/brain-service`,
-  CalendarService: `${API_ENDPOINT}/calendar-service/calendar/v1`,
+  authService: "https://api.thunai.ai/auth-service/ai/api/v1",
+  accountService: `https://api.thunai.ai/account-service/ai/api/v1`,
+  chatService: "https://api.thunai.ai/chat-service/chatai/api/v1",
+  slackService: "https://api.thunai.ai/slack-service/slackai/v1",
+  intService: "https://api.thunai.ai/int-service/thunai/v1",
+  intServiceV2: "https://api.thunai.ai/int-service/thunai/v2",
+  workflowService: "https://api.thunai.ai/workflow-service/agent-workflow/v1",
+  mcpService: "https://api.thunai.ai/workflow-service/mcp/v1",
+  documentService: "https://api.thunai.ai/document-service/ai/api/v1",
+  brainService: "https://api.thunai.ai/brain-service",
+  CalendarService:"https://api.thunai.ai/calendar-service/calendar/v1",
 };
 
 export interface ApiRequestParams<T = any> {
@@ -64,23 +47,6 @@ export interface ApiRequestParams<T = any> {
   data?: T | FormData | null;
   headers?: Record<string, string>;
 }
-
-function encryptData(data: any): string {
-  const jsonString = typeof data === "string" ? data : JSON.stringify(data);
-  return CryptoJS.AES.encrypt(jsonString, HTTP_ENCRYPT_KEY).toString();
-}
-
-function decryptData(encrypted: string): any {
-  try {
-    const bytes = CryptoJS.AES.decrypt(encrypted, HTTP_ENCRYPT_KEY);
-    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-    return JSON.parse(decrypted);
-  } catch (err) {
-    console.error("Decryption failed:", err);
-    return encrypted;
-  }
-}
-
 
 // CSRF Token Management - Simple version
 class CsrfService {
@@ -94,8 +60,7 @@ class CsrfService {
       return false;
     }
 
-   const expiry = Number(validUntil);
-    return Date.now() < (expiry > 1e12 ? expiry : expiry * 1000);
+    return Date.now() < Number(validUntil) * 1000;
   }
 
   async fetchNewToken(): Promise<string> {
@@ -170,16 +135,7 @@ api.interceptors.request.use(async (config) => {
       config.headers["x-csrftoken"] = fallbackCsrf;
     }
   }
-  if ( IS_ENCRYPTION_FLOW &&
-  config.data &&
-  typeof config.data === "object" &&
-  !(config.data instanceof FormData)) {
-    try {
-      config.data = { encrypted_payload: encryptData(config.data) };
-    } catch (err) {
-      console.error("Request encryption failed:", err);
-    }
-  }
+  
   return config;
 });
 
@@ -188,15 +144,7 @@ let isRefreshing = false;
 let pendingRequests: ((token: string) => void)[] = [];
 
 api.interceptors.response.use(
-  (response) => {  if (IS_ENCRYPTION_FLOW && response?.data?.encrypted_response) {
-      try {
-        response.data = decryptData(response.data.encrypted_response);
-      } catch (err) {
-        console.error("Response decryption failed:", err);
-      }
-    }
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const status = error?.response?.status;
     const message = error?.response?.data?.message?.toLowerCase() || "";
@@ -245,18 +193,8 @@ api.interceptors.response.use(
           pendingRequests = [];
         } catch (err) {
           console.error("Token refresh failed:", err);
-          
-          // Clear tokens to prevent further API calls
-          localStorage.removeItem("agent_token");
-          localStorage.removeItem("refresh_token");
-          
           pendingRequests = [];
-          
-          throw {
-            type: 'TOKEN_REFRESH_FAILED',
-            message: 'Your session has expired. Please refresh the page',
-            originalError: err
-          };
+          throw err;
         } finally {
           isRefreshing = false;
         }
@@ -274,6 +212,7 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 export const apiRequest = async <T = any>({
   service,
   endpoint,
@@ -304,6 +243,7 @@ export const apiRequest = async <T = any>({
 };
 
 // formdata
+
 export const requestApiFromData = async (
   method: string,
   endpoint: string,
