@@ -9,6 +9,8 @@ const BrainSection = ({ CIndex }: { CIndex: number }) => {
    const tenantId = localStorage.getItem("tenant_id") || "";
    const [showWeblinkInput, setShowWeblinkInput] = useState(false);
    const [crawlWebsite, setCrawlWebsite] = useState(false);
+   const [webLinkInput, setWebLinkInput] = useState("");
+   const [crawlDepth, setCrawlDepth] = useState(1);
 
     
    const handleButtonClick = () => {
@@ -38,9 +40,30 @@ const BrainSection = ({ CIndex }: { CIndex: number }) => {
       console.error("Upload failed:", error);
     }
   };
-//   const handleToggleEnableWebsite =()=>{
-    
-//   }
+
+  const SendWebLink = async () => {
+     if(webLinkInput.trim() === "") return;
+    try {
+      const response = await requestApiFromData(
+        "POST",
+        `${tenantId}/knowledge-base/`,
+        {
+          links: webLinkInput,
+          crawl: crawlWebsite,
+          crawl_level: crawlDepth,
+        },
+        "authService"
+      );
+      console.log("Web link added successfully:", response.data);
+      // Reset form
+      setWebLinkInput("");
+      setCrawlWebsite(false);
+      setCrawlDepth(1);
+      setShowWeblinkInput(false);
+    } catch (err) {
+      console.error("Error adding web link:", err);
+    }
+  };
   return (
     <>
      <div className="p-6 bg-gray-50 rounded-xl shadow-md border-2 border-gray-200">
@@ -91,7 +114,7 @@ const BrainSection = ({ CIndex }: { CIndex: number }) => {
            } 
             {showWeblinkInput && (
                 <div  className=" w-full">
-                <input type="text" placeholder="https://example.com" className="mt-4 p-2 border-2 border-gray-300 rounded-md w-full outline-none" />
+                <input type="text" onChange={(e) => setWebLinkInput(e.target.value)} placeholder="https://example.com" className="mt-4 p-2 border-2 border-gray-300 rounded-md w-full outline-none" />
                 <div  className="mt-4 flex justify-between items-center gap-4 w-full">
                     <div>
                     <img src="" alt="" />
@@ -113,17 +136,46 @@ const BrainSection = ({ CIndex }: { CIndex: number }) => {
                 {crawlWebsite && (
                     <div className="mt-2 flex items-center justify-between gap-4">
                         <p>Depth:</p>
-                        <div className=" flex items-center justify-between gap-4 text-black">
-                            <span className="h-7 w-7 pl-2 outline-none rounded-full bg-gray-200 border-2 border-gray-300 cursor-pointer">1</span>
-                            <span className="h-7 w-7 pl-2 outline-none rounded-full bg-gray-200 border-2 border-gray-300 cursor-pointer">2</span>
-                            <span className="h-7 w-7 pl-2 outline-none rounded-full bg-gray-200 border-2 border-gray-300 cursor-pointer">3</span>
+                        <div className="flex items-center justify-between gap-4 text-black">
+                            <button
+                              onClick={() => setCrawlDepth(1)}
+                              className={`h-7 w-7 rounded-full border-2 cursor-pointer transition-colors ${
+                                crawlDepth === 1
+                                  ? "bg-blue-500 border-blue-500 text-white"
+                                  : "bg-gray-200 border-gray-300"
+                              }`}
+                            >
+                              1
+                            </button>
+                            <button
+                              onClick={() => setCrawlDepth(2)}
+                              className={`h-7 w-7 rounded-full border-2 cursor-pointer transition-colors ${
+                                crawlDepth === 2
+                                  ? "bg-blue-500 border-blue-500 text-white"
+                                  : "bg-gray-200 border-gray-300"
+                              }`}
+                            >
+                              2
+                            </button>
+                            <button
+                              onClick={() => setCrawlDepth(3)}
+                              className={`h-7 w-7 rounded-full border-2 cursor-pointer transition-colors ${
+                                crawlDepth === 3
+                                  ? "bg-blue-500 border-blue-500 text-white"
+                                  : "bg-gray-200 border-gray-300"
+                              }`}
+                            >
+                              3
+                            </button>
                         </div>
                     </div>
                 )}
 
                 <div className="mt-4 flex justify-end items-center gap-4 w-full">
                     <button className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors" onClick={() => setShowWeblinkInput(false)}>Cancel</button>
-                    <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Add Link</button>
+                    <button className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors" 
+                    onClick={SendWebLink}
+                    >Add Link</button>
                 </div>
             </div>
             )}
