@@ -6,13 +6,12 @@ import ChromeIcon from "@/assets/svg/ChromeIcon.svg";
 
 import { useNavigate } from "react-router-dom";
 
-const IntegrationSection = ({ CIndex }: { CIndex: number }) => {
+const IntegrationSection = React.memo(({ CIndex }: { CIndex: number }) => {
   const navigate = useNavigate();
 
   return (
     <div className="p-6 bg-gray-50 rounded-xl shadow-md border-2 border-gray-200">
       
-      {/* Header */}
       <h2 className="text-xl font-semibold flex items-center gap-3 mb-5">
         <span className="h-7 w-7 flex items-center justify-center rounded-full bg-blue-500 text-white text-sm font-medium">
           {CIndex}
@@ -20,7 +19,6 @@ const IntegrationSection = ({ CIndex }: { CIndex: number }) => {
         Integrations
       </h2>
 
-      {/* Info Box */}
       <div className="flex gap-3 bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
         <div className="h-8 w-8 flex items-center justify-center rounded-full bg-blue-500 text-white">
           <Info size={16} />
@@ -32,10 +30,8 @@ const IntegrationSection = ({ CIndex }: { CIndex: number }) => {
         </p>
       </div>
 
-      {/* Mobile Apps Section */}
       <div className="grid md:grid-cols-2 gap-4 mb-6">
 
-        {/* Android Card */}
         <div className="flex items-center justify-between p-4 bg-white border-2 border-gray-100 rounded-lg shadow-sm">
           <div className="flex items-center gap-3">
             <img src={PlayStoreIcon} alt="android" className="h-10 w-10" />
@@ -55,8 +51,6 @@ const IntegrationSection = ({ CIndex }: { CIndex: number }) => {
             Downloads
           </button>
         </div>
-
-        {/* iOS Card */}
         <div className="flex items-center justify-between p-4 bg-white border-2 border-gray-100 rounded-lg shadow-sm">
           <div className="flex items-center gap-3">
             <img src={AndroidIcon} alt="ios" className="h-10 w-10" />
@@ -78,7 +72,6 @@ const IntegrationSection = ({ CIndex }: { CIndex: number }) => {
         </div>
       </div>
 
-      {/* Chrome Extension */}
       <div className="flex items-center justify-between p-4 bg-white border-2 border-gray-100 rounded-lg shadow-sm">
         <div className="flex items-center gap-3">
           <img src={ChromeIcon} alt="chrome" className="h-10 w-10" />
@@ -100,6 +93,6 @@ const IntegrationSection = ({ CIndex }: { CIndex: number }) => {
       </div>
     </div>
   );
-};
+});
 
 export default IntegrationSection;
