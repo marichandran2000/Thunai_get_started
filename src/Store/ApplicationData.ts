@@ -1,19 +1,25 @@
 import { create } from "zustand";
 import { requestApi } from "@/Service/MeetingService";
 
+interface ApplicationType {
+    ApplicationList:any[],
+    SelectedApps: any[],
+    toggleSelectedApp: any[],
+    isLoading: boolean,
+    error:string | null,
+}
 
 const url = new URL(window.location.href);
 
 const getTenantId = (): string => {
-  const tenantId =
-    url.searchParams.get("tenant_id") ||
+  const tenantId = url.searchParams.get("tenant_id") ||
     localStorage.getItem("tenant_id");
 
   if (!tenantId) throw new Error("Tenant ID not found");
   return tenantId;
 };
 
-const ApplicationData = create((set)=>({
+const ApplicationData = create<ApplicationType>((set)=>({
     ApplicationList:[],
     SelectedApps: [],
     isLoading: false,

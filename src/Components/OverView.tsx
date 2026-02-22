@@ -1,4 +1,4 @@
-import React,{useEffect, useState} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Check } from "lucide-react";
 import { GrIntegration } from "react-icons/gr";
 import { LuBrainCog } from "react-icons/lu";
@@ -9,7 +9,7 @@ import BrainSection from "@/Subcomponent/BrainSection";
 import ConnectApplication from "@/Subcomponent/ConnectApplication";
 import QuickStartSidebar from "@/Subcomponent/QuickStartSidebar";
 import  ApplicationData from "../Store/ApplicationData";
-import  AgentSection from "@/Subcomponent/AgentSection";
+import AgentSection, { type AgentSectionRef } from "@/Subcomponent/AgentSection";
 import  FinalSection from "@/Subcomponent/FinalSection";
 
 import { requestApi } from "@/Service/MeetingService";
@@ -41,17 +41,13 @@ const OverView = () => {
   const [activeStep, setActiveStep] = useState(1);
   const [currentCount, setCurrentCount] = React.useState("");
   const [selectedAgentType, setSelectedAgentType] = useState<string>("Chat Agent");
-  
+  const agentSectionRef = useRef<AgentSectionRef>(null);
+
   const {ApplicationList,fetchApplications,isLoading,SelectedApps} = ApplicationData();
   
   useEffect(()=>{
       fetchApplications();
   },[])
-  console.log("inside overview SelectedApps",SelectedApps);
-  
-
-  const CurrentStep = 0;
-  const tenantId = localStorage.getItem("tenant_id") || "";
 
   useEffect(()=>{
     const FetchCurrentCount = async() => {
@@ -127,26 +123,24 @@ const OverView = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-full lg:h-[100vh]">
+    <div className="flex flex-col lg:flex-row min-h-screen sm:min-h-0 h-full lg:h-[100vh]">
     
-      {/* Main Content Area */}
-      <div className={`flex-1 ${activeStep === 3 && SelectedApps.length > 0 ? "" : ""} transition-all`}>
-        <div className="sm:px-[50px] md:px-[100px] lg:px-[200px]">
-        {/* Header */}
-        <div className="flex flex-col items-center text-center gap-2 mb-5 pt-4">
-          <h1 className="text-2xl md:text-4xl font-semibold">
+      <div className={`flex-1 min-w-0 ${activeStep === 3 && SelectedApps.length > 0 ? "" : ""} transition-all`}>
+        <div className="px-4 sm:px-[50px] md:px-[80px] lg:px-[100px] xl:px-[150px] 2xl:px-[200px]">
+
+        <div className="flex flex-col items-center text-center gap-2 mb-4 sm:mb-5 pt-4 sm:pt-6">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold">
             Get Started With{" "}
             <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent font-bold">
               Thunai!
             </span>
           </h1>
-          <p className="text-gray-500 text-sm md:text-base">
+          <p className="text-gray-500 text-xs sm:text-sm md:text-base max-w-md lg:max-w-lg xl:max-w-xl">
             Complete these steps to set up your Thunai experience.
           </p>
         </div>
 
-        {/* ===== Desktop View ===== */}
-        <div className="hidden sm:flex items-center justify-between mt-5 relative">
+        <div className="hidden sm:flex items-center justify-between mt-4 sm:mt-5 relative gap-2 md:gap-4 lg:gap-2 xl:gap-4">
           {steps.map((step, index) => {
             const isCompleted = index + 1 < activeStep;
             const isActive = index + 1 === activeStep;
@@ -154,9 +148,8 @@ const OverView = () => {
             return (
               <div
                 key={index}
-                className="flex flex-col items-center flex-1 relative"
+                className="flex flex-col items-center flex-1 relative min-w-0"
               >
-                {/* Line */}
                 {index !== steps.length - 1 && (
                   <div className="absolute top-5 left-1/2 w-full h-[2px] bg-gray-300 -z-10">
                     <div
@@ -171,7 +164,7 @@ const OverView = () => {
 
 
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-semibold transition-all duration-300 flex-shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-blue-500 text-white ring-4 ring-blue-200"
                       : isCompleted
@@ -180,12 +173,11 @@ const OverView = () => {
                   }`}
                   onClick={() => handleStepClick(index)}
                 >
-                  {isCompleted ? <Check size={20} /> : step.icon}
+                  {isCompleted ? <Check size={18} className="sm:w-5 sm:h-5" /> : step.icon}
                 </div>
 
                 <p
-                  
-                  className="mt-3 text-sm text-gray-700 cursor-pointer hover:text-blue-500"
+                  className="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-gray-700 cursor-pointer hover:text-blue-500 truncate w-full text-center"
                 >
                   {step?.label}
                 </p>
@@ -194,31 +186,29 @@ const OverView = () => {
           })}
         </div>
 
-       {/* ===== Sidebar (Small devices) ===== */}
       <div className="sm:hidden w-full p-2">
         <div className="text-center mb-4">
-          <p className="text-sm text-gray-500">Step {activeStep} of {steps.length}: {steps[activeStep - 1]?.label}</p>
+          <p className="text-xs sm:text-sm text-gray-500">Step {activeStep} of {steps.length}: {steps[activeStep - 1]?.label}</p>
         </div>
         
-        {/* Progress Bar */}
         <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
           <div
             className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${((activeStep - 1) / steps.length) * 100}%` }}
+            style={{ width: `${(activeStep / steps.length) * 100}%` }}
           ></div>
         </div>
       </div>
 
       <div className="mt-2">
       {activeStep > 1 && (
-        <button className="flex text-blue-700" onClick={()=>{
+        <button className="flex items-center cursor-pointer gap-1 text-blue-700 text-sm sm:text-base hover:opacity-80" onClick={()=>{
           if (activeStep > 1){
             setActiveStep(activeStep - 1)
           }
-        }}><img src={LeftArrow} alt="" />Back</button>
+        }}><img src={LeftArrow} alt="" className="w-4 h-4" />Back</button>
       )}
       </div>
-      <section className="h-[calc(68vh)] overflow-y-auto">
+      <section className="min-h-[50vh] sm:min-h-[calc(68vh)] h-[calc(68vh)] overflow-y-auto pb-6">
         {activeStep === 1 && (
            <IntegrationSection CIndex={activeStep} />
           )}
@@ -229,23 +219,36 @@ const OverView = () => {
           <ConnectApplication CIndex={activeStep} ApplicationList={ApplicationList} isLoading={isLoading} />
         )}
         {activeStep === 4 && (
-          <AgentSection CIndex={activeStep} selectedAgentType={selectedAgentType} onAgentTypeChange={setSelectedAgentType} />
+          <AgentSection
+            ref={agentSectionRef}
+            CIndex={activeStep}
+            selectedAgentType={selectedAgentType}
+            onAgentTypeChange={setSelectedAgentType}
+          />
         )}
 
         {activeStep === 5 && (
            <FinalSection CIndex={activeStep} />
           )}
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-2 mt-4 sm:mt-6">
             {activeStep === 4 && (
-              <button className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Create Agent</button>
+              <button
+                type="button"
+                onClick={() => agentSectionRef.current?.createAgent()}
+                className="w-full sm:w-auto mt-2 sm:mt-0 px-4 sm:px-6 py-2.5 sm:py-2 text-sm sm:text-base bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors cursor-pointer"
+              >
+                Create Agent
+              </button>
             )}
             
-            <button
-              onClick={handleNextClick}
-              className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-            >
-              {activeStep === 4 ? "Skip and Continue" : "Next"}
-            </button>
+            {activeStep < steps.length && (
+              <button
+                onClick={handleNextClick}
+                className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-2 text-sm sm:text-base bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors cursor-pointer"
+              >
+                {activeStep === 4 ? "Skip and Continue" : "Next"}
+              </button>
+            )}
           </div>
 
         
