@@ -24,20 +24,21 @@ if(userId) localStorage.setItem("user_id",userId)
 if(urlRefreshToken) localStorage.setItem("refresh_token", urlRefreshToken)
 if(urlValidUntil) localStorage.setItem("valid_until",urlValidUntil)
 
+  const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || (window as any)['env']['API_ENDPOINT'] || (window as any)?.env?.API_ENDPOINT; 
 
 // All service base URLs
 const SERVICE_BASE_URLS: Record<string, string> = {
-  authService: "https://api.thunai.ai/auth-service/ai/api/v1",
-  accountService: `https://api.thunai.ai/account-service/ai/api/v1`,
-  chatService: "https://api.thunai.ai/chat-service/chatai/api/v1",
-  slackService: "https://api.thunai.ai/slack-service/slackai/v1",
-  intService: "https://api.thunai.ai/int-service/thunai/v1",
-  intServiceV2: "https://api.thunai.ai/int-service/thunai/v2",
-  workflowService: "https://api.thunai.ai/workflow-service/agent-workflow/v1",
-  mcpService: "https://api.thunai.ai/workflow-service/mcp/v1",
-  documentService: "https://api.thunai.ai/document-service/ai/api/v1",
-  brainService: "https://api.thunai.ai/brain-service",
-  CalendarService:"https://api.thunai.ai/calendar-service/calendar/v1",
+  authService: `${API_ENDPOINT}/auth-service/ai/api/v1`,
+  accountService: `${API_ENDPOINT}/account-service/ai/api/v1`,
+  chatService: `${API_ENDPOINT}/chat-service/chatai/api/v1`,
+  slackService: `${API_ENDPOINT}/slack-service/slackai/v1`,
+  intService: `${API_ENDPOINT}/int-service/thunai/v1`,
+  intServiceV2: `${API_ENDPOINT}/int-service/thunai/v2`,
+  workflowService: `${API_ENDPOINT}/workflow-service/agent-workflow/v1`,
+  mcpService: `${API_ENDPOINT}/workflow-service/mcp/v1`,
+  documentService: `${API_ENDPOINT}/document-service/ai/api/v1`,
+  brainService: `${API_ENDPOINT}/brain-service`,
+  CalendarService: `${API_ENDPOINT}/calendar-service/calendar/v1`,
 };
 
 export interface ApiRequestParams<T = any> {

@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Check } from "lucide-react";
 import { GrIntegration } from "react-icons/gr";
 import { LuBrainCog } from "react-icons/lu";
+// import AppSetUpIcon from "@/assets/svg/AppSetup.svg";
 import { MdOutlineAppSettingsAlt, MdOutlineSupportAgent } from "react-icons/md";
 import LeftArrow from "../assets/svg/Arrow_back.svg";
 import IntegrationSection from "@/Subcomponent/IntegrationSection";
@@ -39,7 +40,7 @@ const steps = [
 
 const OverView = () => {
   const [activeStep, setActiveStep] = useState(1);
-  const [currentCount, setCurrentCount] = React.useState("");
+  const [switchNext, setSwitchNext] = useState(false);
   const [selectedAgentType, setSelectedAgentType] = useState<string>("Chat Agent");
   const agentSectionRef = useRef<AgentSectionRef>(null);
 
@@ -59,9 +60,8 @@ const OverView = () => {
           "accountService"
         )
         const stepNumber = res.data.completed_status || 1;
-        setCurrentCount(stepNumber);
         setActiveStep(stepNumber);
-      }catch(err){
+      }catch(err: unknown){
         console.error("Error fetching current count:", err);
       }
     }
@@ -72,6 +72,7 @@ const OverView = () => {
   const handleNextClick = async () => {
     if (activeStep < steps.length) {
       const nextStep = activeStep + 1;
+      setSwitchNext(true)
       try {
         await requestApi(
           "POST",
@@ -79,10 +80,11 @@ const OverView = () => {
           { completed_status: nextStep },
           "accountService"
         );
+        setSwitchNext(false)
         setActiveStep(nextStep);
-        setCurrentCount(nextStep);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error updating step:", err);
+        setSwitchNext(false)
       }
     }
   };
@@ -91,7 +93,7 @@ const OverView = () => {
     setActiveStep(index + 1);
   };
 
- const featureSets: { [key: string]: string[] } = {
+ const featureSets: { CHAT_AGENT: string[]; VOICE_AGENT: string[]; EMAIL_AGENT: string[] } = {
     CHAT_AGENT: [
       'Customizable Widget Appearance: You can customize the appearance and behavior of the chat widget through basic settings like widget name and allowed domains, ensuring it aligns with your brand and operational needs.',
       'Agent Language Selection: Choose the language in which the agent will communicate, ensuring effective communication with your target audience.',
@@ -151,7 +153,7 @@ const OverView = () => {
                 className="flex flex-col items-center flex-1 relative min-w-0"
               >
                 {index !== steps.length - 1 && (
-                  <div className="absolute top-5 left-1/2 w-full h-[2px] bg-gray-300 -z-10">
+                  <div className="absolute top-8 left-1/2 w-full h-[2px] bg-gray-300 -z-10">
                     <div
                       className={`h-[2px] ${
                         index < activeStep
@@ -164,7 +166,7 @@ const OverView = () => {
 
 
                 <div
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-semibold transition-all duration-300 flex-shrink-0 cursor-pointer ${
+                  className={`w-15 h-15 sm:w-15 sm:h-15 rounded-full flex items-center justify-center font-semibold transition-all duration-300 flex-shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-blue-500 text-white ring-4 ring-blue-200"
                       : isCompleted
@@ -228,7 +230,7 @@ const OverView = () => {
         )}
 
         {activeStep === 5 && (
-           <FinalSection CIndex={activeStep} />
+           <FinalSection />
           )}
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-2 mt-4 sm:mt-6">
             {activeStep === 4 && (
@@ -246,7 +248,7 @@ const OverView = () => {
                 onClick={handleNextClick}
                 className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-2 text-sm sm:text-base bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors cursor-pointer"
               >
-                {activeStep === 4 ? "Skip and Continue" : "Next"}
+                {activeStep === 4 ? "Skip and Continue" : switchNext? "Loading..." : "Next"}
               </button>
             )}
           </div>

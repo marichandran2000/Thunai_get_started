@@ -1,12 +1,23 @@
 import { create } from "zustand";
 import { requestApi } from "@/Service/MeetingService";
 
+interface Application {
+    id: string;
+    name?: string;
+    display_name?: string;
+    logo?: string;
+    description?: string;
+    [key: string]: any;
+}
+
 interface ApplicationType {
-    ApplicationList:any[],
-    SelectedApps: any[],
-    toggleSelectedApp: any[],
-    isLoading: boolean,
-    error:string | null,
+    ApplicationList: Application[];
+    SelectedApps: Application[];
+    toggleSelectedApp: (app: Application) => void;
+    fetchApplications: () => Promise<void>;
+    isAppSelected: (appId: string) => (state: ApplicationType) => boolean;
+    isLoading: boolean;
+    error: unknown | null;
 }
 
 const url = new URL(window.location.href);
@@ -43,16 +54,16 @@ const ApplicationData = create<ApplicationType>((set)=>({
             );
             // console.log("Fetched Applications:==>", response);
             set({ ApplicationList: response.data.data, isLoading: false });
-        } catch (err) {
+        } catch (err: unknown) {
             set({ error: err, isLoading: false });
         }
     },
-    toggleSelectedApp: (app: any) => {
-        set((state: any) => {
-            const isSelected = state.SelectedApps.some((a: any) => a.id === app.id);
+    toggleSelectedApp: (app: Application) => {
+        set((state) => {
+            const isSelected = state.SelectedApps.some((a) => a.id === app.id);
             if (isSelected) {
                 return {
-                    SelectedApps: state.SelectedApps.filter((a: any) => a.id !== app.id)
+                    SelectedApps: state.SelectedApps.filter((a) => a.id !== app.id)
                 };
             } else {
                 return {
@@ -62,7 +73,7 @@ const ApplicationData = create<ApplicationType>((set)=>({
         });
     },
     isAppSelected: (appId: string) => {
-        return (state: any) => state.SelectedApps.some((a: any) => a.id === appId);
+        return (state: ApplicationType) => state.SelectedApps.some((a) => a.id === appId);
     }
 
 }))

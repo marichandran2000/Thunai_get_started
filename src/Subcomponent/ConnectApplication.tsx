@@ -2,10 +2,19 @@
 import FileDownloadIcon from "@/assets/svg/Filedownload.svg";
 import { Check } from "lucide-react";
 
-import  ApplicationData from "../Store/ApplicationData"
+import ApplicationData from "../Store/ApplicationData"
+
+interface Application {
+  id: string;
+  name?: string;
+  display_name?: string;
+  logo?: string;
+  description?: string;
+  [key: string]: unknown;
+}
 
 const ConnectApplication = ({ CIndex, ApplicationList, isLoading }: 
-  { CIndex: number, ApplicationList: any[], isLoading: boolean }) => {
+  { CIndex: number, ApplicationList: Application[], isLoading: boolean }) => {
     
     const {toggleSelectedApp, SelectedApps} = ApplicationData();
     
@@ -40,8 +49,8 @@ const ConnectApplication = ({ CIndex, ApplicationList, isLoading }:
         {isLoading && (
           <p className="text-center text-gray-500 col-span-full text-sm sm:text-base py-4">Loading applications...</p>
         )}
-  {ApplicationList.map((app: any) => {
-    const isSelected = SelectedApps.some((a: any) => a.id === app.id);
+  {ApplicationList.map((app: Application) => {
+    const isSelected = SelectedApps.some((a) => a.id === app.id);
     return (
       <div
         key={app.id}

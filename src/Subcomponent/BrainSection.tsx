@@ -32,20 +32,20 @@ const BrainSection = ({ CIndex }: { CIndex: number }) => {
         "POST",
         `${tenantId}/knowledge-base/`,
         formData,
-        "authService"
+        "brainService"
       );
       toast.success(response?.data?.message || "File Uploaded successfully");
 
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Upload failed:", error);
       toast.error(
-      error instanceof Error
-        ? error.message
-        : "Failed to update"
-    );
+        error instanceof Error
+          ? error.message
+          : "Failed to update"
+      );
     }
   };
 
@@ -60,20 +60,20 @@ const BrainSection = ({ CIndex }: { CIndex: number }) => {
           crawl: crawlWebsite,
           crawl_level: crawlDepth,
         },
-        "authService"
+        "brainService"
       );
       toast.success(response?.data?.message || "Successfully Add web link");
       setWebLinkInput("");
       setCrawlWebsite(false);
       setCrawlDepth(1);
       setShowWeblinkInput(false);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error adding web link:", err);
       toast.error(
-      err instanceof Error
-        ? err?.message
-        : "Failed to adding web link"
-    );
+        err instanceof Error
+          ? err.message
+          : "Failed to adding web link"
+      );
     }
   };
   return (

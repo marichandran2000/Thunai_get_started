@@ -1,13 +1,16 @@
 import { useRef, useImperativeHandle, forwardRef } from 'react';
 import CreateAgentIcon from "@/assets/svg/CreateAgent.svg";
 import ChatIcon from "@/assets/svg/ChatIcon.svg";
+import ChatIconBlack from "@/assets/svg/ChatIconBlack.svg";
 import VoiceAgentIcon from "@/assets/svg/VoiceAgent.svg";
+import VoiceAgentIconBlack from "@/assets/svg/VoiceAgentBlack.svg";
 import MailIcon from "@/assets/svg/MailIcon.svg";
+import MailIconBlack from "@/assets/svg/MailIconBlack.svg";
 import StarIcon from "@/assets/svg/StarIcon.svg";
 import { requestApi } from "@/Service/MeetingService";
 import { ToastContainer, toast } from "react-toastify";
 
-export type AgentSectionRef = { createAgent: () => Promise<void> };
+export type AgentSectionRef = { createAgent: () => Promise<void>};
 
 const AgentSection = forwardRef<AgentSectionRef, {
   CIndex: number;
@@ -19,16 +22,21 @@ const AgentSection = forwardRef<AgentSectionRef, {
 
  
   const inputRef = useRef<HTMLInputElement>(null);
-  const inputMessageRef = useRef<HTMLInputElement>(null);
+  const inputMessageRef = useRef<HTMLTextAreaElement>(null);
 
     const AgentType=[
         {TapName:"Chat Agent",
-        icon: ChatIcon},
+        icon: ChatIcon,
+        icon2: ChatIconBlack,
+      },
       {TapName:"Voice Agent",
-      icon: VoiceAgentIcon},
-      {
-       TapName:"Mail Agent",
-       icon: MailIcon,
+        icon: VoiceAgentIcon,
+        icon2: VoiceAgentIconBlack,
+      },
+        {
+          TapName:"Mail Agent",
+          icon: MailIcon,
+          icon2: MailIconBlack,
         }
     ]
 
@@ -69,7 +77,7 @@ const AgentSection = forwardRef<AgentSectionRef, {
       inputMessageRef.current.value = "";
     }
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error creating agent:", error);
     toast.error(
       error instanceof Error
@@ -102,11 +110,11 @@ const AgentSection = forwardRef<AgentSectionRef, {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 rounded-lg">
+      <div className="flex flex-col sm:justify-center md:justify-start sm:w-[100%] md:w-[70%] sm:flex-row flex-wrap gap-2 sm:gap-2 rounded-lg">
         {AgentType.map((agentType, index)=>(
             <div key={index} className="sm:flex-1 sm:min-w-0 rounded-lg" onClick={()=>onAgentTypeChange(agentType.TapName)}>
-              <div className={`flex justify-between items-center gap-2 p-3 sm:p-2 text-black border-2 border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer ${selectedAgentType === agentType.TapName ? ' bg-gradient-to-r from-blue-600 to-blue-400 border text-white' : ''}`}>
-               <img src={agentType.icon} alt={agentType.TapName} className="h-5 w-5 flex-shrink-0 object-contain" />
+              <div className={`flex justify-between items-center gap-1 p-3 sm:p-2 text-black border-2 border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer ${selectedAgentType === agentType.TapName ? ' bg-gradient-to-r from-blue-600 to-blue-400 border text-white' : ''}`}>
+               <img src={selectedAgentType === agentType.TapName ? agentType.icon : agentType.icon2} alt={agentType.TapName} className="h-5 w-5 flex-shrink-0 object-contain" />
                 <span className="text-xs sm:text-sm font-light truncate">{agentType.TapName}</span>
               </div>
             </div>

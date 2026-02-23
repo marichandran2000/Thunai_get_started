@@ -2,7 +2,34 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Check } from "lucide-react";
 
-const QuickStartSidebar = ({ selectedApps,activeStep,featureSets, selectedAgentType }: { selectedApps: any[], activeStep: number, featureSets: any, selectedAgentType?: string }) => {
+interface Application {
+  id: string;
+  name?: string;
+  display_name?: string;
+  logo?: string;
+  description?: string;
+  docs_uri?: string;
+  [key: string]: unknown;
+}
+
+interface FeatureSets {
+  CHAT_AGENT?: string[];
+  VOICE_AGENT?: string[];
+  EMAIL_AGENT?: string[];
+  [key: string]: string[] | undefined;
+}
+
+const QuickStartSidebar = ({ 
+  selectedApps, 
+  activeStep, 
+  featureSets, 
+  selectedAgentType 
+}: { 
+  selectedApps: Application[]; 
+  activeStep: number; 
+  featureSets: FeatureSets; 
+  selectedAgentType?: string;
+}) => {
   const [activeAppIndex, setActiveAppIndex] = useState(0);
   const [copied, setCopied] = useState(false);
 
@@ -155,7 +182,7 @@ const QuickStartSidebar = ({ selectedApps,activeStep,featureSets, selectedAgentT
             <h6 className="text-sm sm:text-base text-gray-700">Thunai AI offers AI-powered voice agents that enable AI-driven interactions within various applications.</h6>
           </div>
 
-          {featureSets[getAgentFeatureKey(selectedAgentType)]?.length > 0 ? (
+          {featureSets[getAgentFeatureKey(selectedAgentType)] && featureSets[getAgentFeatureKey(selectedAgentType)]!.length > 0 ? (
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-3 sm:mb-4 uppercase tracking-wide">Key Features:</h4>
               <ul className="space-y-2 sm:space-y-3 max-h-[40vh] sm:max-h-[60vh] overflow-y-auto">
