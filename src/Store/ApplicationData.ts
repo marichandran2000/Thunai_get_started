@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { requestApi } from "@/Service/MeetingService";
+import {getLocalStorageItem, requestApi } from "@/Service/MeetingService";
 
 interface Application {
     id: string;
@@ -21,9 +21,10 @@ interface ApplicationType {
 }
 
 const url = new URL(window.location.href);
+ const userInfo = getLocalStorageItem("user_info") || {};
 
 const getTenantId = (): string => {
-  const tenantId = url.searchParams.get("tenant_id") ||
+  const tenantId =  userInfo?.default_tenant_id || url.searchParams.get("tenant_id") ||
     localStorage.getItem("tenant_id");
 
   if (!tenantId) throw new Error("Tenant ID not found");

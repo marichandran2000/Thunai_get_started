@@ -21,13 +21,13 @@ const ConnectApplication = ({ CIndex, ApplicationList, isLoading }:
   return (
     <>
      <div className="p-4 sm:p-6 bg-gray-50 rounded-xl shadow-md border-2 border-gray-200">
+       <div className="h-full lg:h-[calc(70vh-170px)] scrollbar-thin overflow-y-scroll">
          <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
         <span className="h-7 w-7 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-medium flex-shrink-0">
           {CIndex}
         </span>
         Connect Your Applications
       </h2>
-
 
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center bg-blue-50 border border-blue-200 p-3 sm:p-4 rounded-lg mb-2">
         <div className="h-8 w-8 flex items-center justify-center rounded-full bg-blue-500 text-white flex-shrink-0">
@@ -42,7 +42,7 @@ const ConnectApplication = ({ CIndex, ApplicationList, isLoading }:
       <div>
         <h3 className="text-base sm:text-lg font-semibold">Select Applications to Connect</h3>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-4 min-h-[200px] sm:min-h-[280px] h-[calc(35vh)] max-h-[50vh] sm:max-h-none overflow-y-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-4">
         {ApplicationList.length === 0 && !isLoading && (
           <p className="text-center text-gray-500 col-span-full text-sm sm:text-base py-4">No applications found.</p>
         )}
@@ -83,7 +83,7 @@ const ConnectApplication = ({ CIndex, ApplicationList, isLoading }:
     );
   })}
 </div>
-
+</div>
         </div>
     </>
   )

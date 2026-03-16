@@ -125,12 +125,12 @@ const OverView = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen sm:min-h-0 h-full lg:h-[100vh]">
+    <div className="flex flex-col lg:flex-row sm:min-h-0 h-full lg:h-[100vh] p-4">
     
       <div className={`flex-1 min-w-0 ${activeStep === 3 && SelectedApps.length > 0 ? "" : ""} transition-all`}>
-        <div className="px-4 sm:px-[50px] md:px-[80px] lg:px-[100px] xl:px-[150px] 2xl:px-[200px]">
+        <div className={` ${activeStep === 3 || activeStep === 4 ? "sm:px-[10px] lg:px-[50px]":"sm:h-[10px] lg:px-[170px]"}`}>
 
-        <div className="flex flex-col items-center text-center gap-2 mb-4 sm:mb-5 pt-4 sm:pt-6">
+        <div className="flex flex-col items-center text-center gap-2 mb-2">
           <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold">
             Get Started With{" "}
             <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent font-bold">
@@ -142,7 +142,7 @@ const OverView = () => {
           </p>
         </div>
 
-        <div className="hidden sm:flex items-center justify-between mt-4 sm:mt-5 relative gap-2 md:gap-4 lg:gap-2 xl:gap-4">
+        <div className="hidden sm:flex items-center justify-between sm:mt-5 mt-2 relative gap-2 md:gap-4 lg:gap-2 xl:gap-4">
           {steps.map((step, index) => {
             const isCompleted = index + 1 < activeStep;
             const isActive = index + 1 === activeStep;
@@ -153,7 +153,7 @@ const OverView = () => {
                 className="flex flex-col items-center flex-1 relative min-w-0"
               >
                 {index !== steps.length - 1 && (
-                  <div className="absolute top-8 left-1/2 w-full h-[2px] bg-gray-300 -z-10">
+                  <div className="absolute top-6 z-50 left-1/2 w-full h-[2px] bg-gray-300 -z-10">
                     <div
                       className={`h-[2px] ${
                         index < activeStep
@@ -166,7 +166,7 @@ const OverView = () => {
 
 
                 <div
-                  className={`w-15 h-15 sm:w-15 sm:h-15 rounded-full flex items-center justify-center font-semibold transition-all duration-300 flex-shrink-0 cursor-pointer ${
+                  className={`sm:w-12 sm:h-12 w-15 h-15 rounded-full z-[99] flex items-center justify-center font-semibold transition-all duration-300 flex-shrink-0 cursor-pointer ${
                     isActive
                       ? "bg-blue-500 text-white ring-4 ring-blue-200"
                       : isCompleted
@@ -179,7 +179,7 @@ const OverView = () => {
                 </div>
 
                 <p
-                  className="mt-2 sm:mt-3 text-xs sm:text-sm md:text-base text-gray-700 cursor-pointer hover:text-blue-500 truncate w-full text-center"
+                  className="mt-1 sm:mt-2 text-[10px] sm:text-sm md:text-base text-gray-700 cursor-text hover:text-blue-500 truncate w-full text-center"
                 >
                   {step?.label}
                 </p>
@@ -203,14 +203,14 @@ const OverView = () => {
 
       <div className="mt-2">
       {activeStep > 1 && (
-        <button className="flex items-center cursor-pointer gap-1 text-blue-700 text-sm sm:text-base hover:opacity-80" onClick={()=>{
+        <button className="flex items-center cursor-pointer gap-1 text-blue-700 text-sm sm:text-base hover:opacity-80 mb-2" onClick={()=>{
           if (activeStep > 1){
             setActiveStep(activeStep - 1)
           }
         }}><img src={LeftArrow} alt="" className="w-4 h-4" />Back</button>
       )}
       </div>
-      <section className="min-h-[50vh] sm:min-h-[calc(68vh)] h-[calc(68vh)] overflow-y-auto pb-6">
+      <section className="h-full lg:h-[calc(60vh-100px)]">
         {activeStep === 1 && (
            <IntegrationSection CIndex={activeStep} />
           )}
@@ -232,7 +232,8 @@ const OverView = () => {
         {activeStep === 5 && (
            <FinalSection />
           )}
-          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-2 mt-4 sm:mt-6">
+
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-2 sm:mt-4  mt-2">
             {activeStep === 4 && (
               <button
                 type="button"
@@ -252,7 +253,6 @@ const OverView = () => {
               </button>
             )}
           </div>
-
         
       </section>
 

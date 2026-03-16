@@ -1,12 +1,13 @@
 import {useState,useRef} from 'react';
 import { ToastContainer, toast } from "react-toastify";
 import SchoolIcon from "@/assets/svg/School.svg";
-import { requestApiFromData } from "@/Service/MeetingService";
+import {getLocalStorageItem , requestApiFromData } from "@/Service/MeetingService";
 
 const BrainSection = ({ CIndex }: { CIndex: number }) => {
 
    const fileInputRef = useRef<HTMLInputElement | null>(null);
-   const tenantId = localStorage.getItem("tenant_id") || "";
+    const userInfo = getLocalStorageItem("user_info") || {};
+   const tenantId =  userInfo?.default_tenant_id || localStorage.getItem("tenant_id") || "";
    const [showWeblinkInput, setShowWeblinkInput] = useState(false);
    const [crawlWebsite, setCrawlWebsite] = useState(false);
    const [webLinkInput, setWebLinkInput] = useState("");

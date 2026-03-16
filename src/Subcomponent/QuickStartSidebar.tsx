@@ -56,7 +56,7 @@ const QuickStartSidebar = ({
 
   return (
     <>
-    <div className="w-full lg:w-[400px] lg:min-w-[400px] lg:max-w-[400px] bg-white border-t lg:border-t-0 lg:border-l border-gray-200 p-4 sm:p-6 overflow-y-auto max-h-[60vh] lg:max-h-none">
+    <div className="w-full lg:w-[400px] bg-white border-t lg:border-t-0 lg:border-l border-gray-200 p-4 sm:p-6 overflow-y-scroll scrollbar-thin max-h-[60vh] lg:max-h-none">
       <div className="flex items-center gap-2 mb-4 sm:mb-6 pb-4 sm:pb-6 border-b border-gray-200">
         <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-blue-500 text-white flex items-center justify-center flex-shrink-0">
           <Menu size={18} className="sm:w-5 sm:h-5" />
@@ -153,7 +153,7 @@ const QuickStartSidebar = ({
           </p>
           <button
           onClick={handleCopyDocLink}
-          className={`w-full sm:w-auto px-3 py-1.5 sm:py-1 rounded-md text-xs sm:text-sm font-medium transition-colors flex-shrink-0 ${
+          className={`w-full sm:w-auto px-3 py-1.5 sm:py-1 rounded-md text-xs sm:text-sm font-medium transition-colors flex-shrink-0 cursor-pointer ${
             copied
               ? "bg-green-100 text-green-700"
               : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -185,7 +185,7 @@ const QuickStartSidebar = ({
           {featureSets[getAgentFeatureKey(selectedAgentType)] && featureSets[getAgentFeatureKey(selectedAgentType)]!.length > 0 ? (
             <div>
               <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-3 sm:mb-4 uppercase tracking-wide">Key Features:</h4>
-              <ul className="space-y-2 sm:space-y-3 max-h-[40vh] sm:max-h-[60vh] overflow-y-auto">
+              <ul className="space-y-2 sm:space-y-3">
                 {featureSets[getAgentFeatureKey(selectedAgentType)]?.map((feature: string, index: number) => (
                   <li key={index} className="flex gap-2 min-w-0">
                     <Check size={14} className="text-blue-700 mt-0.5 font-bold min-w-fit flex-shrink-0" />

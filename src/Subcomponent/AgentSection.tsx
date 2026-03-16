@@ -7,7 +7,7 @@ import VoiceAgentIconBlack from "@/assets/svg/VoiceAgentBlack.svg";
 import MailIcon from "@/assets/svg/MailIcon.svg";
 import MailIconBlack from "@/assets/svg/MailIconBlack.svg";
 import StarIcon from "@/assets/svg/StarIcon.svg";
-import { requestApi } from "@/Service/MeetingService";
+import { getLocalStorageItem , requestApi } from "@/Service/MeetingService";
 import { ToastContainer, toast } from "react-toastify";
 
 export type AgentSectionRef = { createAgent: () => Promise<void>};
@@ -17,7 +17,9 @@ const AgentSection = forwardRef<AgentSectionRef, {
   selectedAgentType: string;
   onAgentTypeChange: (type: string) => void;
 }>(({ CIndex, selectedAgentType, onAgentTypeChange }, ref) => {
-  const tenantId = localStorage.getItem("tenant_id") || "";
+
+   const userInfo = getLocalStorageItem("user_info") || {};
+  const tenantId =  userInfo?.default_tenant_id || localStorage.getItem("tenant_id") || "";
 
 
  
@@ -91,9 +93,9 @@ const AgentSection = forwardRef<AgentSectionRef, {
 
   return (
     <>
-    <div className="p-4 sm:p-6 bg-gray-50 rounded-xl shadow-md border-2 border-gray-200">
+    <div className="p-2 sm:p-6 h-full lg:h-[calc(86vh-210px)] overflow-y-scroll scrollbar-thin bg-gray-50 rounded-xl shadow-md border-2 border-gray-200">
       
-      <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5">
+      <h2 className="text-lg sm:text-xl font-semibold flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
         <span className="h-7 w-7 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 text-white text-sm font-medium flex-shrink-0">
           {CIndex}
         </span>
@@ -137,18 +139,18 @@ const AgentSection = forwardRef<AgentSectionRef, {
 
           <div>
             <label htmlFor="agentName" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Agent Name</label>
-          <input type="text" placeholder="Agent Name" className="border border-gray-300 rounded-md p-2 w-full mb-2 text-sm sm:text-base" ref={inputRef} />
+          <input type="text" placeholder="Agent Name" className="border border-gray-300 outline-none rounded-md p-2 w-full mb-2 text-sm sm:text-base" ref={inputRef} />
           </div>
         <div className="mt-2">
         <label htmlFor="agentDescription" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Welcome Message</label>
-      <textarea placeholder="Agent Description" className="border border-gray-300 rounded-md p-2 w-full text-sm sm:text-base min-h-[80px]" ref={inputMessageRef} />
+      <textarea placeholder="Agent Description" className="border outline-none border-gray-300 rounded-md p-2 w-full text-sm sm:text-base min-h-[80px]" ref={inputMessageRef} />
         </div>
       </div>)}
 
       {selectedAgentType === "Voice Agent" && (
         <div className="mt-2 w-full">
           <label htmlFor="voiceAgentName" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Voice Agent Name</label>
-          <input type="text" placeholder="Voice Agent Name" className="border border-gray-300 rounded-md p-2 w-full mb-2 text-sm sm:text-base" ref={inputRef} />
+          <input type="text" placeholder="Voice Agent Name" className="border outline-none border-gray-300 rounded-md p-2 w-full mb-2 text-sm sm:text-base" ref={inputRef} />
         </div>
       )}
 

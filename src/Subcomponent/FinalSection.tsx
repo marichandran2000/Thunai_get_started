@@ -11,9 +11,9 @@ import {
 
 const FinalSection = () => {
   return (
-    <div className="min-h-[60vh] sm:min-h-screen flex items-center justify-center px-4 sm:px-6 py-6 sm:py-10">
-      <div className="w-full max-w-3xl">
-        <div className="flex justify-center mb-4 sm:mb-6">
+    <div className=" flex items-center justify-center sm:py-10">
+      <div className="w-full max-w-3xl border border-gray-200 rounded-sm p-5 bg-white">
+        <div className="flex justify-center mb-2 sm:mb-3">
           <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-green-100 flex items-center justify-center">
             <Check className="text-green-600" size={28} />
           </div>
