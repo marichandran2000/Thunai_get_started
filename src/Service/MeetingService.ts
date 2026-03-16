@@ -1,5 +1,22 @@
 import axios from "axios";
 import type { Method } from "axios";
+import * as CryptoJS from "crypto-js";
+
+
+const IS_ENCRYPTION_FLOW =import.meta.env.VITE_IS_ENCRYPTION === "true" ||
+import.meta.env.VITE_IS_ENCRYPTION_FLOW === true ||
+  (window as any)['env']['IS_ENCRYPTION_FLOW'] === "true" ||
+  (window as any)['env']['IS_ENCRYPTION_FLOW'] === true;
+
+
+const HTTP_ENCRYPT_KEY =  import.meta.env.VITE_HTTP_ENCRYPT_KEY || (window as any)?.env?.ENCRYPTION_KEY;
+const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || (window as any)['env']['API_ENDPOINT'];
+
+
+if (IS_ENCRYPTION_FLOW && !HTTP_ENCRYPT_KEY) {
+  console.error("Encryption key is missing!");
+}
+
 
 const url = new URL(window.location.href);
 const urlToken = url.searchParams.get("token");
@@ -10,6 +27,28 @@ const userId = url.searchParams.get("user_id");
 const urlRefreshToken = url.searchParams.get("refresh_token");
 const urlValidUntil = url.searchParams.get("valid_until");
 
+const encrypted_userInfo = url.searchParams.get("data");
+
+if (encrypted_userInfo) {
+  try {
+    localStorage.setItem("user_info", encrypted_userInfo);
+  } catch (err) {
+    console.error("Failed to params user info from URL:", err);
+  }
+}
+
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+let userInfo: any = getLocalStorageItem("user_info") || {};
+try {
+  const userInfoCookie = getCookie("user_info");
+  if (userInfoCookie) userInfo = JSON.parse(userInfoCookie);
+} catch (e) {
+  console.error("Failed to parse user_info from cookie:", e);
+}
 
 
 // Store in localStorage if found in URL
@@ -27,17 +66,17 @@ if(urlValidUntil) localStorage.setItem("valid_until",urlValidUntil)
 
 // All service base URLs
 const SERVICE_BASE_URLS: Record<string, string> = {
-  authService: "https://api.thunai.ai/auth-service/ai/api/v1",
-  accountService: `https://api.thunai.ai/account-service/ai/api/v1`,
-  chatService: "https://api.thunai.ai/chat-service/chatai/api/v1",
-  slackService: "https://api.thunai.ai/slack-service/slackai/v1",
-  intService: "https://api.thunai.ai/int-service/thunai/v1",
-  intServiceV2: "https://api.thunai.ai/int-service/thunai/v2",
-  workflowService: "https://api.thunai.ai/workflow-service/agent-workflow/v1",
-  mcpService: "https://api.thunai.ai/workflow-service/mcp/v1",
-  documentService: "https://api.thunai.ai/document-service/ai/api/v1",
-  brainService: "https://api.thunai.ai/brain-service",
-  CalendarService:"https://api.thunai.ai/calendar-service/calendar/v1",
+  authService: `${API_ENDPOINT}/auth-service/ai/api/v1`,
+  accountService: `${API_ENDPOINT}/account-service/ai/api/v1`,
+  chatService: `${API_ENDPOINT}/chat-service/chatai/api/v1`,
+  slackService: `${API_ENDPOINT}/slack-service/slackai/v1`,
+  intService: `${API_ENDPOINT}/int-service/thunai/v1`,
+  intServiceV2: `${API_ENDPOINT}/int-service/thunai/v2`,
+  workflowService: `${API_ENDPOINT}/workflow-service/agent-workflow/v1`,
+  mcpService: `${API_ENDPOINT}/workflow-service/mcp/v1`,
+  documentService: `${API_ENDPOINT}/document-service/ai/api/v1`,
+  brainService: `${API_ENDPOINT}/brain-service`,
+  CalendarService: `${API_ENDPOINT}/calendar-service/calendar/v1`,
 };
 
 export interface ApiRequestParams<T = any> {
@@ -48,13 +87,29 @@ export interface ApiRequestParams<T = any> {
   headers?: Record<string, string>;
 }
 
+function encryptData(data: any): string {
+  const jsonString = typeof data === "string" ? data : JSON.stringify(data);
+  return CryptoJS.AES.encrypt(jsonString, HTTP_ENCRYPT_KEY).toString();
+}
+
+function decryptData(encrypted: string): any {
+  try {
+    const bytes = CryptoJS.AES.decrypt(encrypted, HTTP_ENCRYPT_KEY);
+    const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+    return JSON.parse(decrypted);
+  } catch (err) {
+    console.error("Decryption failed:", err);
+    return encrypted;
+  }
+}
+
 // CSRF Token Management - Simple version
 class CsrfService {
   private csrfRequest: Promise<string> | null = null;
 
   private isTokenValid(): boolean {
-    const csrfToken = localStorage.getItem("csrf_token");
-    const validUntil = localStorage.getItem("valid_until");
+    const csrfToken =userInfo?.csrf_token || localStorage.getItem("csrf_token");
+    const validUntil = userInfo?.valid_unti || localStorage.getItem("valid_until");
     
     if (!csrfToken || !validUntil) {
       return false;
@@ -78,6 +133,9 @@ class CsrfService {
           // Store in localStorage
           localStorage.setItem("csrf_token", token);
           localStorage.setItem("valid_until", validUntil.toString());
+          userInfo.csrf_token = token;
+          userInfo.csrf_valid_until = validUntil;
+          setLocalStorageItem("user_info", JSON.stringify(userInfo));
 
           // console.log("New CSRF Token Fetched:", token);
           this.csrfRequest = null;
@@ -94,7 +152,7 @@ class CsrfService {
 
   async getCsrfToken(): Promise<string> {
     if (this.isTokenValid()) {
-      return localStorage.getItem("csrf_token")!;
+      return userInfo?.csrf_token! || localStorage.getItem("csrf_token")!;
     }
     return this.fetchNewToken();
   }
@@ -105,15 +163,59 @@ const REFRESH_URL = `${SERVICE_BASE_URLS.accountService}/account/refresh/token/`
 
 // Token helpers
 function getAccessToken() {
-  return localStorage.getItem("agent_token");
+  return  getLocalStorageItem("user_info")?.access_token || localStorage.getItem("agent_token");
 }
 function getRefreshToken() {
-  return localStorage.getItem("refresh_token");
+  return getLocalStorageItem("user_info")?.refresh_token || localStorage.getItem("refresh_token");
 }
 function updateTokens(access: string, refresh: string) {
   localStorage.setItem("agent_token", access);
   localStorage.setItem("refresh_token", refresh);
+   userInfo.access_token = access;
+  userInfo.refresh_token = refresh;
+  setLocalStorageItem("user_info", JSON.stringify(userInfo));
 }
+
+
+export function getLocalStorageItem(key: any) {
+
+  if (key) {
+    const keyData = localStorage.getItem(key);
+    if (keyData) {
+      console.log("http", HTTP_ENCRYPT_KEY);
+
+      const decrypteDATA = CryptoJS.AES.decrypt(keyData.trim(), HTTP_ENCRYPT_KEY);
+      if (decrypteDATA) {
+        const decryptData = decrypteDATA.toString(CryptoJS.enc.Utf8);
+
+        try {
+          try {
+            return JSON.parse(decryptData);
+          } catch {
+            return decryptData; // Return raw string if not valid JSON
+          }
+        } catch (e) {
+          console.error('Failed to parse decrypted data:', e);
+          return decryptData;
+        }
+      } else return null;
+    } else return null;
+  } else return null;
+}
+
+export function setLocalStorageItem(key: any, value: any) {
+  if (value) {
+    const valueToStore = typeof value === 'string' ? value : JSON.stringify(value);
+    // if(value.access_token){
+    //   setCookie(value, value.expires_in);
+    // }
+    localStorage.setItem(key, CryptoJS.AES.encrypt(valueToStore, HTTP_ENCRYPT_KEY).toString());
+
+  } else {
+    console.error('Invalid value to store in localStorage:', value);
+  }
+}
+
 const api = axios.create({
   //   timeout: 15000,
 });
@@ -130,12 +232,21 @@ api.interceptors.request.use(async (config) => {
     }
   } catch (error) {
     console.error("Failed to get CSRF token:", error);
-    const fallbackCsrf = localStorage.getItem("csrf_token");
+    const fallbackCsrf = userInfo?.csrf_token //localStorage.getItem("csrf_token");
     if (fallbackCsrf) {
       config.headers["x-csrftoken"] = fallbackCsrf;
     }
   }
-  
+  if (IS_ENCRYPTION_FLOW &&
+    config.data &&
+    typeof config.data === "object" &&
+    !(config.data instanceof FormData)) {
+    try {
+      config.data = { encrypted_payload: encryptData(config.data) };
+    } catch (err) {
+      console.error("Request encryption failed:", err);
+    }
+  }
   return config;
 });
 
@@ -144,7 +255,16 @@ let isRefreshing = false;
 let pendingRequests: ((token: string) => void)[] = [];
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (IS_ENCRYPTION_FLOW && response?.data?.encrypted_response) {
+      try {
+        response.data = decryptData(response.data.encrypted_response);
+      } catch (err) {
+        console.error("Response decryption failed:", err);
+      }
+    }
+    return response;
+  },
   async (error) => {
     const status = error?.response?.status;
     const message = error?.response?.data?.message?.toLowerCase() || "";
@@ -193,8 +313,18 @@ api.interceptors.response.use(
           pendingRequests = [];
         } catch (err) {
           console.error("Token refresh failed:", err);
+
+          // Clear tokens to prevent further API calls
+          localStorage.removeItem("agent_token");
+          localStorage.removeItem("refresh_token");
+
           pendingRequests = [];
-          throw err;
+
+          throw {
+            type: 'TOKEN_REFRESH_FAILED',
+            message: 'Your session has expired. Please refresh the page',
+            originalError: err
+          };
         } finally {
           isRefreshing = false;
         }
@@ -226,7 +356,7 @@ export const apiRequest = async <T = any>({
   try {
     const response = await api.request<T>({
       url: `${SERVICE_BASE_URLS[service]}/${endpoint}`,
-      method,
+      method: method as Method,
       data,
       headers,
     });
@@ -273,6 +403,8 @@ export const requestApi = async (
     data: data,
     headers: {
       "Content-Type": "application/json",
+       Authorization: `Bearer ${getAccessToken()}`,
+      "x-csrftoken": userInfo?.csrf_token || url.searchParams.get("csrf_token")  || "",
     },
   });
 };
